@@ -39,3 +39,4 @@ tmp/
 # IDE
 .idea/*
 .vscode
+test_package_installer/build/
