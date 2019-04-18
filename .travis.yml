@@ -1,8 +1,8 @@
 linux: &linux
    os: linux
-   sudo: required
+   dist: xenial
    language: python
-   python: "3.6"
+   python: "3.7"
    services:
      - docker
 osx: &osx
@@ -10,6 +10,10 @@ osx: &osx
    language: generic
 matrix:
    include:
+      - <<: *linux
+        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6-x86 CONAN_ARCHS=x86 ARCH=x86 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
+      - <<: *linux
+        env: CONAN_GCC_VERSIONS=7 CONAN_DOCKER_IMAGE=conanio/gcc7-centos6 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
       - <<: *linux
         env: CONAN_GCC_VERSIONS=4.9 CONAN_DOCKER_IMAGE=conanio/gcc49
       - <<: *linux
@@ -31,6 +35,9 @@ matrix:
       - <<: *linux
         env: CONAN_CLANG_VERSIONS=7.0 CONAN_DOCKER_IMAGE=conanio/clang7
       - <<: *osx
+        osx_image: xcode10.1
+        env: CONAN_APPLE_CLANG_VERSIONS=10.0 CONAN_ARCHS=x86_64 ARCH=x86_64 CPT_TEST_FOLDER=test_package_installer CONAN_CONANFILE=conanfile_installer.py
+      - <<: *osx
         osx_image: xcode7.3
         env: CONAN_APPLE_CLANG_VERSIONS=7.3
       - <<: *osx
@@ -47,9 +54,9 @@ matrix:
         env: CONAN_APPLE_CLANG_VERSIONS=10.0
 
 install:
-  - chmod +x .travis/install.sh
-  - ./.travis/install.sh
+  - chmod +x .ci/install.sh
+  - ./.ci/install.sh
 
 script:
-  - chmod +x .travis/run.sh
-  - ./.travis/run.sh
+  - chmod +x .ci/run.sh
+  - ./.ci/run.sh

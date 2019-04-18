@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -7,24 +8,19 @@ from conans.errors import ConanInvalidConfiguration
 from conanfile_base import FlexBase
 
 
-class FlexConan(FlexBase):
-    name = "flex"
+class FlexInstaller(FlexBase):
+    name = "flex_installer"
     version = FlexBase.version
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    settings = "os_build", "arch_build", "compiler"
 
     def configure(self):
-        if self.settings.os == "Windows":
+        if self.settings.os_build == "Windows":
             raise ConanInvalidConfiguration("Flex is not supported on Windows.")
-        del self.settings.compiler.libcxx
 
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
-            configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
-            configure_args.append("--disable-static" if self.options.shared else "--enable-static")
-            configure_args.append("--disable-nls")
+            configure_args = ["--disable-shared", "--disable-static", "--disable-nls"]
             if str(self.settings.compiler) == "gcc" and Version(self.settings.compiler.version.value) >= "6":
                 configure_args.append("ac_cv_func_reallocarray=no")
             if tools.cross_building(self.settings):
@@ -48,9 +44,8 @@ class FlexConan(FlexBase):
 
     def package(self):
         super().package()
-        for header in ["flexint.h", "flexdef.h", "parse.h", ""]:
-            self.copy(header, dst="include", src=os.path.join(self._source_subfolder, "src"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
